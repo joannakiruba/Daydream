@@ -2,6 +2,12 @@ import { AnimatePresence, motion } from 'framer-motion'
 import type { CSSProperties } from 'react'
 import { useWidgetStore, dockAxis, type WidgetId, type DockPosition } from '../../stores/widgetStore'
 import { TasksWidget } from '../tasks/TasksWidget'
+import { QuickCaptureWidget } from '../widgets/QuickCaptureWidget'
+import { ScratchpadWidget } from '../widgets/ScratchpadWidget'
+import { JournalWidget } from '../widgets/JournalWidget'
+import { DailyReviewWidget } from '../widgets/DailyReviewWidget'
+import { CalendarWidget } from '../widgets/CalendarWidget'
+import { CountdownWidget } from '../widgets/CountdownWidget'
 
 const widgetLabels: Record<WidgetId, string> = {
   tasks: 'Tasks',
@@ -127,23 +133,6 @@ export function Drawer() {
     flexDirection: 'column',
   }
 
-  const placeholderStyle: CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 'var(--space-sm)',
-    flex: 1,
-    color: 'var(--color-text-muted)',
-    fontSize: 13,
-    padding: 'var(--space-md)',
-  }
-
-  const placeholderIconStyle: CSSProperties = {
-    fontSize: 32,
-    opacity: 0.3,
-  }
-
   const motion_ = activeWidget ? getSlideMotion(dockPosition) : null
 
   return (
@@ -172,17 +161,13 @@ export function Drawer() {
               </button>
             </div>
             <div style={bodyStyle}>
-              {activeWidget === 'tasks' ? (
-                <TasksWidget />
-              ) : (
-                <div style={placeholderStyle}>
-                  <span style={placeholderIconStyle}>{widgetIcons[activeWidget]}</span>
-                  <span>{widgetLabels[activeWidget]}</span>
-                  <span style={{ fontSize: 12, fontStyle: 'italic', opacity: 0.6 }}>
-                    Coming soon
-                  </span>
-                </div>
-              )}
+              {activeWidget === 'tasks' && <TasksWidget />}
+              {activeWidget === 'capture' && <QuickCaptureWidget />}
+              {activeWidget === 'scratchpad' && <ScratchpadWidget />}
+              {activeWidget === 'journal' && <JournalWidget />}
+              {activeWidget === 'review' && <DailyReviewWidget />}
+              {activeWidget === 'calendar' && <CalendarWidget />}
+              {activeWidget === 'countdowns' && <CountdownWidget />}
             </div>
           </motion.div>
         )}
