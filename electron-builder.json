@@ -1,0 +1,29 @@
+{
+  "appId": "com.daydream.app",
+  "productName": "Daydream",
+  "directories": {
+    "output": "release"
+  },
+  "files": [
+    "dist/**/*",
+    "electron/**/*"
+  ],
+  "win": {
+    "target": ["nsis"],
+    "icon": "public/favicon.svg"
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "installerSidebar": null
+  },
+  "mac": {
+    "target": ["dmg"],
+    "icon": "public/favicon.svg"
+  },
+  "linux": {
+    "target": ["AppImage"],
+    "icon": "public/favicon.svg"
+  }
+}

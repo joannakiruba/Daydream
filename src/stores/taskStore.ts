@@ -103,9 +103,22 @@ export const useTaskStore = create<TaskStore>((set, get) => {
   function checkAllComplete(date: string) {
     const state = get()
     const dayAssignments = Object.values(state.assignments).filter((a) => a.date === date)
-    if (dayAssignments.length === 0) return
-    const allDone = dayAssignments.every((a) => a.done)
     const existing = state.dayRecords[date]
+
+    if (dayAssignments.length === 0) {
+      if (existing?.allCompleteAt) {
+        set((s) => ({
+          dayRecords: {
+            ...s.dayRecords,
+            [date]: { ...existing, allCompleteAt: null },
+          },
+        }))
+        persist()
+      }
+      return
+    }
+
+    const allDone = dayAssignments.every((a) => a.done)
 
     if (allDone && !existing?.allCompleteAt) {
       set((s) => ({
@@ -237,9 +250,10 @@ export const useTaskStore = create<TaskStore>((set, get) => {
 
     assignToDay: (taskId, date) => {
       const key = `${taskId}:${date}`
-      set((s) => ({
-        assignments: { ...s.assignments, [key]: { taskId, date, done: false } },
-      }))
+      set((s) => {
+        if (s.assignments[key]) return s
+        return { assignments: { ...s.assignments, [key]: { taskId, date, done: false } } }
+      })
       persist()
       checkAllComplete(date)
     },
@@ -268,8 +282,10 @@ export const useTaskStore = create<TaskStore>((set, get) => {
     },
 
     closeDay: (date) => {
+      if (date > today()) return
       set((s) => {
         const existing = s.dayRecords[date]
+        if (existing?.closedAt) return s
         return {
           dayRecords: {
             ...s.dayRecords,
@@ -288,6 +304,7 @@ export const useTaskStore = create<TaskStore>((set, get) => {
       const fromKey = `${taskId}:${fromDate}`
       const toKey = `${taskId}:${toDate}`
       set((s) => {
+        if (!s.assignments[fromKey]) return s
         const { [fromKey]: _removed, ...remaining } = s.assignments
         return {
           assignments: { ...remaining, [toKey]: { taskId, date: toDate, done: false } },
@@ -295,9 +312,11 @@ export const useTaskStore = create<TaskStore>((set, get) => {
       })
       persist()
       checkAllComplete(fromDate)
+      checkAllComplete(toDate)
     },
 
     markAllComplete: (date) => {
+      const now = new Date().toISOString()
       set((s) => {
         const updated = { ...s.assignments }
         const taskUpdates = { ...s.tasks }
@@ -305,8 +324,12 @@ export const useTaskStore = create<TaskStore>((set, get) => {
           if (a.date !== date || a.done) continue
           updated[key] = { ...a, done: true }
           const task = taskUpdates[a.taskId]
-          if (task?.completionMode === 'checkbox') {
-            taskUpdates[a.taskId] = { ...task, done: true, completedAt: task.completedAt ?? new Date().toISOString() }
+          if (!task) continue
+          taskUpdates[a.taskId] = {
+            ...task,
+            done: true,
+            percent: 100,
+            completedAt: task.completedAt ?? now,
           }
         }
         return { assignments: updated, tasks: taskUpdates }

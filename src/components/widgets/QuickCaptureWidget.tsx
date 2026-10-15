@@ -133,7 +133,7 @@ export function QuickCaptureWidget() {
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit() }}
         />
-        <button style={sendBtn} onClick={handleSubmit}>+</button>
+        <button style={sendBtn} onClick={handleSubmit} aria-label="Submit capture">+</button>
       </div>
 
       <div style={{ fontSize: 11, color: 'var(--color-text-muted)', fontWeight: 600 }}>

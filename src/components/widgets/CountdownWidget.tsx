@@ -178,7 +178,7 @@ export function CountdownWidget() {
               onClick={() => deleteCountdown(c.id)}
               onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-danger)' }}
               onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-muted)' }}
-              title="Delete"
+              aria-label={`Delete ${c.title}`}
             >
               x
             </button>

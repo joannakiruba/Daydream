@@ -180,22 +180,22 @@ export function CalendarWidget() {
   return (
     <div style={container}>
       <div style={nav}>
-        <button style={navBtn} onClick={prevMonth}>‹</button>
+        <button style={navBtn} onClick={prevMonth} aria-label="Previous month">‹</button>
         <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-primary)' }}>{monthLabel}</span>
-        <button style={navBtn} onClick={nextMonth}>›</button>
+        <button style={navBtn} onClick={nextMonth} aria-label="Next month">›</button>
       </div>
 
       <div style={gridStyle}>
         {days.map((d, i) => <div key={i} style={dayHeader}>{d}</div>)}
         {grid.map((date, i) => (
-          <div key={i} style={cellStyle(date)} onClick={() => date && setSelectedDate(date)}>
-            {date && (
-              <>
-                {parseInt(date.slice(8), 10)}
-                {(() => { const d = dotIndicator(date); return d ? <div style={d} /> : null })()}
-              </>
-            )}
-          </div>
+          date ? (
+            <button key={i} style={cellStyle(date)} onClick={() => setSelectedDate(date)} aria-label={date}>
+              {parseInt(date.slice(8), 10)}
+              {(() => { const d = dotIndicator(date); return d ? <div style={d} /> : null })()}
+            </button>
+          ) : (
+            <div key={i} style={cellStyle(date)} />
+          )
         ))}
       </div>
 

@@ -48,7 +48,7 @@ function getContainerStyle(pos: DockPosition, isOpen: boolean): CSSProperties {
     ...anchors[pos],
     zIndex: 15,
     pointerEvents: isOpen ? 'auto' : 'none',
-    overflow: isVertical ? 'visible' : 'visible',
+    overflow: isVertical ? 'visible' : 'hidden',
   }
 }
 
@@ -75,12 +75,14 @@ function getPanelStyle(pos: DockPosition): CSSProperties {
   }
 }
 
+const DRAWER_SIZE = 340
+
 function getSlideMotion(pos: DockPosition) {
   const map: Record<DockPosition, { axis: 'x' | 'y'; from: number }> = {
-    left: { axis: 'x', from: -340 },
-    right: { axis: 'x', from: 340 },
-    top: { axis: 'y', from: -340 },
-    bottom: { axis: 'y', from: 340 },
+    left: { axis: 'x', from: -DRAWER_SIZE },
+    right: { axis: 'x', from: DRAWER_SIZE },
+    top: { axis: 'y', from: -DRAWER_SIZE },
+    bottom: { axis: 'y', from: DRAWER_SIZE },
   }
   const { axis, from } = map[pos]
   return {

@@ -10,7 +10,6 @@ import {
 } from '../lib/themes'
 
 export type { WeatherId, ScenePalette }
-export type SceneId = 'bedroom' | 'cafe' | 'garden'
 
 const STORAGE_KEY = 'daydream:theme-state'
 
@@ -43,17 +42,25 @@ interface ThemeState {
   setRespectReducedMotion: (respect: boolean) => void
 }
 
+const VALID_WEATHER = new Set<string>(['clear', 'rain', 'snow'])
+
+function isValidHex(v: unknown): v is string {
+  return typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v)
+}
+
 function load(): PersistedTheme {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) {
       const parsed = JSON.parse(raw)
+      const speed = typeof parsed.animationSpeed === 'number' && parsed.animationSpeed >= 0 && parsed.animationSpeed <= 1
+        ? parsed.animationSpeed : 1
       return {
-        presetId: parsed.presetId ?? 'rainy-bedroom',
-        customAccent: parsed.customAccent ?? null,
-        weatherOverride: parsed.weatherOverride ?? null,
-        animationSpeed: parsed.animationSpeed ?? 1,
-        respectReducedMotion: parsed.respectReducedMotion ?? true,
+        presetId: typeof parsed.presetId === 'string' ? parsed.presetId : 'rainy-bedroom',
+        customAccent: isValidHex(parsed.customAccent) ? parsed.customAccent : null,
+        weatherOverride: VALID_WEATHER.has(parsed.weatherOverride) ? parsed.weatherOverride as WeatherId : null,
+        animationSpeed: speed,
+        respectReducedMotion: typeof parsed.respectReducedMotion === 'boolean' ? parsed.respectReducedMotion : true,
       }
     }
   } catch { /* corrupt */ }

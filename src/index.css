@@ -115,10 +115,22 @@ input, textarea {
   outline: none;
 }
 
+input:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--color-accent-dim);
+  outline-offset: 1px;
+  border-radius: var(--radius-sm);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--color-accent-dim);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
 @keyframes rain-fall {
   from { transform: translateY(-10px) rotate(4deg); opacity: 0; }
   10%  { opacity: 1; }
-  to   { transform: translateY(110vh) rotate(4deg); opacity: 0; }
+  to   { transform: translateY(420px) rotate(4deg); opacity: 0; }
 }
 
 @keyframes lamp-pulse {

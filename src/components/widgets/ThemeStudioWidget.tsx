@@ -1,4 +1,4 @@
-import { useState, type CSSProperties } from 'react'
+import { useState, useEffect, type CSSProperties } from 'react'
 import { useThemeStore } from '../../stores/themeStore'
 import { PRESETS, type WeatherId, type SeasonId } from '../../lib/themes'
 
@@ -33,6 +33,10 @@ export function ThemeStudioWidget() {
   const [seasonFilter, setSeasonFilter] = useState<SeasonId>('default')
   const [showCustomHex, setShowCustomHex] = useState(false)
   const [hexInput, setHexInput] = useState(customAccent ?? '')
+
+  useEffect(() => {
+    setHexInput(customAccent ?? '')
+  }, [customAccent])
 
   const filteredPresets = seasonFilter === 'default'
     ? PRESETS
@@ -318,6 +322,7 @@ export function ThemeStudioWidget() {
             value={animationSpeed}
             onChange={(e) => setAnimationSpeed(parseFloat(e.target.value))}
             style={sliderStyle}
+            aria-label="Animation speed"
           />
           <span style={{ fontSize: 11, color: 'var(--color-text-muted)', minWidth: 24, textAlign: 'right' }}>Full</span>
         </div>
@@ -329,7 +334,7 @@ export function ThemeStudioWidget() {
       {/* ── Reduced motion ── */}
       <div style={section}>
         <div style={sectionLabel}>Accessibility</div>
-        <button style={checkRow} onClick={() => setRespectReducedMotion(!respectReducedMotion)}>
+        <button style={checkRow} onClick={() => setRespectReducedMotion(!respectReducedMotion)} role="checkbox" aria-checked={respectReducedMotion}>
           <span style={{
             ...checkbox,
             background: respectReducedMotion ? 'var(--color-accent)' : 'transparent',

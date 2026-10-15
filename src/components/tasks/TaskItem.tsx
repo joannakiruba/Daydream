@@ -45,7 +45,16 @@ function ProgressBar({
     onChange(Math.max(0, Math.min(100, pct)))
   }
   return (
-    <div style={track} onClick={handleClick}>
+    <div
+      style={track}
+      onClick={handleClick}
+      role={interactive ? 'slider' : undefined}
+      aria-valuemin={interactive ? 0 : undefined}
+      aria-valuemax={interactive ? 100 : undefined}
+      aria-valuenow={interactive ? value : undefined}
+      aria-label={interactive ? 'Task progress' : undefined}
+      tabIndex={interactive ? 0 : undefined}
+    >
       <div style={fill} />
     </div>
   )
@@ -70,6 +79,7 @@ export function TaskItem({ taskId, depth = 0, showDailyToggle, dailyDate }: Task
   const [addingChild, setAddingChild] = useState(false)
   const [childTitle, setChildTitle] = useState('')
   const [hovered, setHovered] = useState(false)
+  const [focused, setFocused] = useState(false)
 
   const subtasks = useMemo(() => getSubtasks(allTasks, taskId), [allTasks, taskId])
   const percent = useMemo(() => computePercent(allTasks, taskId), [allTasks, taskId])
@@ -181,7 +191,7 @@ export function TaskItem({ taskId, depth = 0, showDailyToggle, dailyDate }: Task
     justifyContent: 'center',
     fontSize: 12,
     color: 'var(--color-text-muted)',
-    opacity: hovered ? 1 : 0,
+    opacity: hovered || focused ? 1 : 0,
     transition: 'opacity var(--transition-fast)',
     flexShrink: 0,
   }
@@ -204,7 +214,7 @@ export function TaskItem({ taskId, depth = 0, showDailyToggle, dailyDate }: Task
   const doneCount = subtasks.filter((s) => computePercent(allTasks, s.id) >= 100).length
 
   return (
-    <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
+    <div onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} onFocusCapture={() => setFocused(true)} onBlurCapture={() => setFocused(false)}>
       <div style={row}>
         {/* Completion control */}
         {(task.completionMode === 'checkbox' || showDailyToggle) && (
@@ -226,12 +236,17 @@ export function TaskItem({ taskId, depth = 0, showDailyToggle, dailyDate }: Task
         {/* Content */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-xs)' }}>
-            <span
-              style={titleStyle}
-              onClick={() => hasChildren && setExpanded(!expanded)}
-            >
-              {task.title}
-            </span>
+            {hasChildren ? (
+              <button
+                style={{ ...titleStyle, background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}
+                onClick={() => setExpanded(!expanded)}
+                aria-expanded={expanded}
+              >
+                {task.title}
+              </button>
+            ) : (
+              <span style={titleStyle}>{task.title}</span>
+            )}
             {task.priority >= 3 && (
               <span style={{ width: 7, height: 7, borderRadius: '50%', background: priorityColors[task.priority], flexShrink: 0 }} />
             )}

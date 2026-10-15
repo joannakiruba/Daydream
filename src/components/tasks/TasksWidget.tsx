@@ -367,7 +367,7 @@ function TodayView() {
       {items.map(({ task, assignment }) => (
         <div key={task.id}>
           <div style={dailyRow}>
-            <button style={dailyCheck(assignment.done)} onClick={() => handleDailyToggle(task.id)}>
+            <button style={dailyCheck(assignment.done)} onClick={() => handleDailyToggle(task.id)} aria-label={`Mark ${task.title} ${assignment.done ? 'incomplete' : 'complete'}`}>
               ✓
             </button>
             <div style={{
