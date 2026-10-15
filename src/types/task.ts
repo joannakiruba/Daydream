@@ -50,3 +50,9 @@ export interface ProjectInput {
   description?: string
   color?: string
 }
+
+export interface DayRecord {
+  date: string
+  closedAt: string | null
+  allCompleteAt: string | null
+}

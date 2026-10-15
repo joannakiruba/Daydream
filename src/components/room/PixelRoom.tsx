@@ -30,12 +30,20 @@ export function PixelRoom() {
 
   const tasks = useTaskStore((s) => s.tasks)
   const assignments = useTaskStore((s) => s.assignments)
+  const dayRecords = useTaskStore((s) => s.dayRecords)
 
   const todayStr = today()
   const slots = useMemo(
     () => computeClutterSlots(tasks, assignments, todayStr),
     [tasks, assignments, todayStr],
   )
+
+  const restored = useMemo(() => {
+    const todayAssignments = Object.values(assignments).filter((a) => a.date === todayStr)
+    return todayAssignments.length > 0 && todayAssignments.every((a) => a.done)
+  }, [assignments, todayStr])
+
+  const dayClosed = dayRecords[todayStr]?.closedAt != null
 
   const containerStyle: CSSProperties = {
     flex: 1,
@@ -82,9 +90,18 @@ export function PixelRoom() {
   return (
     <div style={containerStyle}>
       {scene === 'bedroom' ? (
-        <BedroomScene slots={slots} weather={weather} animate={animate} />
+        <BedroomScene slots={slots} weather={weather} animate={animate} restored={restored} />
       ) : (
         <PlaceholderScene scene={scene} />
+      )}
+
+      {restored && (
+        <div style={{
+          fontSize: 12, color: 'var(--color-success)', fontWeight: 600,
+          textAlign: 'center', letterSpacing: 0.5,
+        }}>
+          {dayClosed ? 'Day complete — room restored' : 'All tasks done — room restored!'}
+        </div>
       )}
 
       <div style={controls}>

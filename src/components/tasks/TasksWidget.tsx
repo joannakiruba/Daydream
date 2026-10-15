@@ -2,7 +2,7 @@ import { useState, useMemo, type CSSProperties } from 'react'
 import type { DailyAssignment, Task } from '../../types/task'
 import { useTaskStore } from '../../stores/taskStore'
 import { getRootTasks, computePercent } from '../../lib/taskHelpers'
-import { today } from '../../lib/dates'
+import { today, addDays, formatDate } from '../../lib/dates'
 import { TaskItem } from './TaskItem'
 import { TaskEditor } from './TaskEditor'
 import { ProjectCard } from './ProjectCard'
@@ -116,15 +116,106 @@ function QuickAdd({ onAdd, placeholder }: { onAdd: (title: string) => void; plac
   )
 }
 
+/* ── Defer picker ── */
+
+function DeferPicker({ taskId, date, onClose }: { taskId: string; date: string; onClose: () => void }) {
+  const { deferTask } = useTaskStore()
+  const [customDate, setCustomDate] = useState('')
+
+  const options = [
+    { label: 'Tomorrow', target: addDays(date, 1) },
+    { label: 'In 2 days', target: addDays(date, 2) },
+    { label: 'Next week', target: addDays(date, 7) },
+  ]
+
+  const handleDefer = (target: string) => {
+    deferTask(taskId, date, target)
+    onClose()
+  }
+
+  const container: CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 'var(--space-xs)',
+    padding: 'var(--space-sm)',
+    background: 'var(--color-bg-overlay)',
+    borderRadius: 'var(--radius-md)',
+    border: '1px solid var(--color-border)',
+    boxShadow: 'var(--shadow-md)',
+  }
+
+  const optBtn: CSSProperties = {
+    fontSize: 12,
+    padding: '4px 8px',
+    borderRadius: 'var(--radius-sm)',
+    color: 'var(--color-text-secondary)',
+    textAlign: 'left',
+    transition: 'background var(--transition-fast)',
+  }
+
+  const dateRow: CSSProperties = {
+    display: 'flex',
+    gap: 'var(--space-xs)',
+    alignItems: 'center',
+  }
+
+  return (
+    <div style={container}>
+      <span style={{ fontSize: 11, color: 'var(--color-text-muted)', fontWeight: 600 }}>Defer to...</span>
+      {options.map((o) => (
+        <button
+          key={o.label}
+          style={optBtn}
+          onClick={() => handleDefer(o.target)}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-bg-hover)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+        >
+          {o.label} ({formatDate(o.target)})
+        </button>
+      ))}
+      <div style={dateRow}>
+        <input
+          type="date"
+          style={{
+            flex: 1, fontSize: 11, padding: '3px 6px',
+            borderRadius: 'var(--radius-sm)',
+            background: 'var(--color-bg-base)',
+            border: '1px solid var(--color-border)',
+            color: 'var(--color-text-primary)',
+          }}
+          min={addDays(date, 1)}
+          value={customDate}
+          onChange={(e) => setCustomDate(e.target.value)}
+        />
+        <button
+          style={{ fontSize: 11, color: 'var(--color-accent)', fontWeight: 600, opacity: customDate ? 1 : 0.4 }}
+          onClick={() => { if (customDate) handleDefer(customDate) }}
+        >
+          Go
+        </button>
+      </div>
+      <button
+        style={{ fontSize: 11, color: 'var(--color-text-muted)', textAlign: 'center' }}
+        onClick={onClose}
+      >
+        Cancel
+      </button>
+    </div>
+  )
+}
+
 /* ── Today view ── */
 
 function TodayView() {
   const tasks = useTaskStore((s) => s.tasks)
   const assignments = useTaskStore((s) => s.assignments)
-  const { addTask, assignToDay, toggleDailyDone, updateTask } = useTaskStore()
+  const dayRecords = useTaskStore((s) => s.dayRecords)
+  const { addTask, assignToDay, toggleDailyDone, updateTask, closeDay, markAllComplete } = useTaskStore()
   const [showEditor, setShowEditor] = useState(false)
+  const [deferringTaskId, setDeferringTaskId] = useState<string | null>(null)
 
   const todayStr = today()
+  const dayClosed = dayRecords[todayStr]?.closedAt != null
 
   const items = useMemo(() => {
     return Object.values(assignments)
@@ -138,6 +229,9 @@ function TodayView() {
   }, [assignments, tasks, todayStr])
 
   const doneCount = items.filter((i) => i.assignment.done).length
+  const totalCount = items.length
+  const allDone = totalCount > 0 && doneCount === totalCount
+  const hasIncomplete = totalCount > 0 && doneCount < totalCount
 
   const handleQuickAdd = (title: string) => {
     const id = addTask({ title })
@@ -145,6 +239,7 @@ function TodayView() {
   }
 
   const handleDailyToggle = (taskId: string) => {
+    if (dayClosed) return
     const key = `${taskId}:${todayStr}`
     const assignment = assignments[key]
     if (!assignment) return
@@ -174,6 +269,7 @@ function TodayView() {
     gap: 'var(--space-sm)',
     padding: '4px 0',
     borderRadius: 'var(--radius-sm)',
+    position: 'relative',
   }
   const dailyCheck = (done: boolean): CSSProperties => ({
     width: 20,
@@ -188,44 +284,149 @@ function TodayView() {
     color: done ? 'var(--color-bg-base)' : 'transparent',
     flexShrink: 0,
     marginTop: 4,
+    cursor: dayClosed ? 'default' : 'pointer',
+    transition: 'all var(--transition-fast)',
+    opacity: dayClosed ? 0.6 : 1,
+  })
+
+  const deferBtn: CSSProperties = {
+    fontSize: 11,
+    color: 'var(--color-text-muted)',
+    padding: '2px 6px',
+    borderRadius: 'var(--radius-sm)',
+    flexShrink: 0,
+    marginTop: 4,
+    transition: 'color var(--transition-fast)',
+  }
+
+  const bannerStyle = (color: string): CSSProperties => ({
+    padding: 'var(--space-sm) var(--space-md)',
+    borderRadius: 'var(--radius-md)',
+    background: `${color}10`,
+    border: `1px solid ${color}30`,
+    textAlign: 'center',
+    fontSize: 13,
+    color,
+  })
+
+  const closeBtnStyle = (primary: boolean): CSSProperties => ({
+    padding: '6px 16px',
+    borderRadius: 'var(--radius-md)',
+    fontSize: 12,
+    fontWeight: 600,
+    background: primary ? 'var(--color-success)' : 'var(--color-bg-overlay)',
+    color: primary ? 'var(--color-bg-base)' : 'var(--color-text-muted)',
+    border: primary ? 'none' : '1px solid var(--color-border)',
     cursor: 'pointer',
     transition: 'all var(--transition-fast)',
   })
 
   return (
     <>
-      <QuickAdd onAdd={handleQuickAdd} placeholder="Add a task for today..." />
-      {showEditor && (
-        <TaskEditor
-          onSave={(input) => {
-            const id = addTask(input)
-            assignToDay(id, todayStr)
-            setShowEditor(false)
-          }}
-          onCancel={() => setShowEditor(false)}
-        />
+      {/* Day closed banner */}
+      {dayClosed && (
+        <div style={bannerStyle('var(--color-text-muted)')}>
+          Day closed — {doneCount}/{totalCount} completed
+        </div>
       )}
-      {!showEditor && (
-        <button
-          style={{ fontSize: 12, color: 'var(--color-accent-dim)', textAlign: 'left', padding: 0 }}
-          onClick={() => setShowEditor(true)}
-        >
-          + Detailed task...
-        </button>
+
+      {/* All-complete celebration banner */}
+      {allDone && !dayClosed && (
+        <div style={bannerStyle('var(--color-success)')}>
+          All tasks complete! Your room is restored.
+        </div>
       )}
-      {items.length === 0 && <div style={empty}>No tasks for today yet.</div>}
+
+      {/* Quick add (only when day is open) */}
+      {!dayClosed && (
+        <>
+          <QuickAdd onAdd={handleQuickAdd} placeholder="Add a task for today..." />
+          {showEditor && (
+            <TaskEditor
+              onSave={(input) => {
+                const id = addTask(input)
+                assignToDay(id, todayStr)
+                setShowEditor(false)
+              }}
+              onCancel={() => setShowEditor(false)}
+            />
+          )}
+          {!showEditor && (
+            <button
+              style={{ fontSize: 12, color: 'var(--color-accent-dim)', textAlign: 'left', padding: 0 }}
+              onClick={() => setShowEditor(true)}
+            >
+              + Detailed task...
+            </button>
+          )}
+        </>
+      )}
+
+      {/* Task list */}
+      {items.length === 0 && !dayClosed && <div style={empty}>No tasks for today yet.</div>}
       {items.map(({ task, assignment }) => (
-        <div key={task.id} style={dailyRow}>
-          <button style={dailyCheck(assignment.done)} onClick={() => handleDailyToggle(task.id)}>
-            ✓
-          </button>
-          <div style={{ flex: 1, opacity: assignment.done ? 0.5 : 1, transition: 'opacity var(--transition-fast)' }}>
-            <TaskItem taskId={task.id} showDailyToggle dailyDate={todayStr} />
+        <div key={task.id}>
+          <div style={dailyRow}>
+            <button style={dailyCheck(assignment.done)} onClick={() => handleDailyToggle(task.id)}>
+              ✓
+            </button>
+            <div style={{
+              flex: 1,
+              opacity: assignment.done ? 0.5 : (dayClosed ? 0.6 : 1),
+              transition: 'opacity var(--transition-fast)',
+            }}>
+              <TaskItem taskId={task.id} showDailyToggle dailyDate={todayStr} />
+            </div>
+            {!dayClosed && !assignment.done && (
+              <button
+                style={deferBtn}
+                onClick={() => setDeferringTaskId(deferringTaskId === task.id ? null : task.id)}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-accent)' }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-muted)' }}
+                title="Defer to another day"
+              >
+                ↗
+              </button>
+            )}
           </div>
+          {deferringTaskId === task.id && (
+            <div style={{ marginLeft: 28, marginBottom: 'var(--space-sm)' }}>
+              <DeferPicker taskId={task.id} date={todayStr} onClose={() => setDeferringTaskId(null)} />
+            </div>
+          )}
         </div>
       ))}
-      {items.length > 0 && (
-        <div style={summary}>{doneCount}/{items.length} completed today</div>
+
+      {/* Summary */}
+      {items.length > 0 && !dayClosed && (
+        <div style={summary}>{doneCount}/{totalCount} completed today</div>
+      )}
+
+      {/* Day closure controls */}
+      {totalCount > 0 && !dayClosed && (
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 'var(--space-sm)', paddingTop: 'var(--space-sm)' }}>
+          {allDone && (
+            <button style={closeBtnStyle(true)} onClick={() => closeDay(todayStr)}>
+              Close Day
+            </button>
+          )}
+          {hasIncomplete && (
+            <>
+              <button
+                style={closeBtnStyle(false)}
+                onClick={() => { markAllComplete(todayStr); closeDay(todayStr) }}
+              >
+                Complete All & Close
+              </button>
+              <button
+                style={closeBtnStyle(false)}
+                onClick={() => closeDay(todayStr)}
+              >
+                Close Anyway
+              </button>
+            </>
+          )}
+        </div>
       )}
     </>
   )
@@ -360,7 +561,7 @@ function AllView() {
     fontStyle: 'italic',
     padding: 'var(--space-lg) 0',
   }
-  const summary: CSSProperties = {
+  const summaryStyle: CSSProperties = {
     fontSize: 11,
     color: 'var(--color-text-muted)',
     textAlign: 'center',
@@ -391,7 +592,7 @@ function AllView() {
         <TaskItem key={t.id} taskId={t.id} />
       ))}
       {rootTasks.length > 0 && (
-        <div style={summary}>{doneCount}/{rootTasks.length} completed</div>
+        <div style={summaryStyle}>{doneCount}/{rootTasks.length} completed</div>
       )}
     </>
   )

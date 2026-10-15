@@ -7,6 +7,7 @@ interface BedroomSceneProps {
   slots: ClutterSlot[]
   weather: WeatherId
   animate: boolean
+  restored?: boolean
 }
 
 /* ── palette ── */
@@ -345,9 +346,50 @@ function ClutterObject({ def, level, animate }: { def: ClutterDef; level: number
   return <div style={style}>{def.render(1)}</div>
 }
 
+/* ── Restoration glow overlay ── */
+
+function RestorationOverlay({ animate }: { animate: boolean }) {
+  const glow: CSSProperties = abs({
+    inset: 0,
+    background: `radial-gradient(ellipse at 50% 40%, ${P.accent}20 0%, transparent 60%)`,
+    zIndex: 8,
+    pointerEvents: 'none',
+    animation: animate ? 'restore-glow 3s ease-in-out infinite' : 'none',
+    opacity: animate ? 1 : 0.6,
+  })
+  const sparkles: CSSProperties = abs({
+    inset: 0,
+    zIndex: 9,
+    pointerEvents: 'none',
+    overflow: 'hidden',
+  })
+  const sparkle = (left: string, top: string, delay: string, size: number): CSSProperties => abs({
+    left, top,
+    width: size, height: size,
+    background: P.accent,
+    borderRadius: '50%',
+    opacity: 0.6,
+    animation: animate ? `sparkle-float 2.5s ${delay} ease-in-out infinite` : 'none',
+  })
+  return (
+    <>
+      <div style={glow} />
+      <div style={sparkles}>
+        <div style={sparkle('20%', '30%', '0s', 3)} />
+        <div style={sparkle('45%', '20%', '0.4s', 2)} />
+        <div style={sparkle('70%', '35%', '0.8s', 3)} />
+        <div style={sparkle('30%', '55%', '1.2s', 2)} />
+        <div style={sparkle('60%', '50%', '1.6s', 3)} />
+        <div style={sparkle('80%', '60%', '0.6s', 2)} />
+        <div style={sparkle('15%', '70%', '1.0s', 2)} />
+      </div>
+    </>
+  )
+}
+
 /* ── Main scene ── */
 
-export function BedroomScene({ slots, weather, animate }: BedroomSceneProps) {
+export function BedroomScene({ slots, weather, animate, restored }: BedroomSceneProps) {
   const isRaining = weather === 'rain'
   const isSnowing = weather === 'snow'
 
@@ -358,9 +400,12 @@ export function BedroomScene({ slots, weather, animate }: BedroomSceneProps) {
     borderRadius: 'var(--radius-lg)',
     position: 'relative',
     overflow: 'hidden',
-    boxShadow: 'var(--shadow-lg)',
+    boxShadow: restored
+      ? `0 8px 24px rgba(0,0,0,0.35), 0 0 30px ${P.accent}15`
+      : 'var(--shadow-lg)',
     imageRendering: 'pixelated',
     border: '1px solid var(--color-border)',
+    transition: 'box-shadow 1s ease',
   }
 
   const wall: CSSProperties = abs({
@@ -397,6 +442,7 @@ export function BedroomScene({ slots, weather, animate }: BedroomSceneProps) {
 
       {isRaining && <RainEffect animate={animate} />}
       {isSnowing && <RainEffect animate={animate} tint="rgba(220,220,240,0.3)" intensity={25} />}
+      {restored && <RestorationOverlay animate={animate} />}
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { create } from 'zustand'
-import type { Task, Project, DailyAssignment, TaskInput, ProjectInput } from '../types/task'
+import type { Task, Project, DailyAssignment, TaskInput, ProjectInput, DayRecord } from '../types/task'
 import { generateId } from '../lib/id'
+import { today } from '../lib/dates'
 
 const STORAGE_KEY = 'daydream:task-data'
 
@@ -8,6 +9,7 @@ interface PersistedData {
   tasks: Record<string, Task>
   projects: Record<string, Project>
   assignments: Record<string, DailyAssignment>
+  dayRecords: Record<string, DayRecord>
 }
 
 function loadData(): PersistedData {
@@ -19,10 +21,11 @@ function loadData(): PersistedData {
         tasks: parsed.tasks ?? {},
         projects: parsed.projects ?? {},
         assignments: parsed.assignments ?? {},
+        dayRecords: parsed.dayRecords ?? {},
       }
     }
   } catch { /* corrupt data */ }
-  return { tasks: {}, projects: {}, assignments: {} }
+  return { tasks: {}, projects: {}, assignments: {}, dayRecords: {} }
 }
 
 function saveData(data: PersistedData) {
@@ -37,6 +40,7 @@ interface TaskStore {
   tasks: Record<string, Task>
   projects: Record<string, Project>
   assignments: Record<string, DailyAssignment>
+  dayRecords: Record<string, DayRecord>
   activeTab: ActiveTab
 
   addTask: (input: TaskInput) => string
@@ -51,21 +55,82 @@ interface TaskStore {
   unassignFromDay: (taskId: string, date: string) => void
   toggleDailyDone: (taskId: string, date: string) => void
 
+  closeDay: (date: string) => void
+  deferTask: (taskId: string, fromDate: string, toDate: string) => void
+  markAllComplete: (date: string) => void
+
   setActiveTab: (tab: ActiveTab) => void
 }
 
 const initial = loadData()
 
+function autoCloseMissedDays(data: PersistedData): PersistedData {
+  const todayStr = today()
+  const assignedDates = new Set<string>()
+  for (const a of Object.values(data.assignments)) {
+    assignedDates.add(a.date)
+  }
+
+  let changed = false
+  const dayRecords = { ...data.dayRecords }
+
+  for (const date of assignedDates) {
+    if (date >= todayStr) continue
+    if (dayRecords[date]?.closedAt) continue
+    dayRecords[date] = {
+      date,
+      closedAt: new Date().toISOString(),
+      allCompleteAt: dayRecords[date]?.allCompleteAt ?? null,
+    }
+    changed = true
+  }
+
+  if (!changed) return data
+  return { ...data, dayRecords }
+}
+
+const bootstrapped = autoCloseMissedDays(initial)
+if (bootstrapped !== initial) {
+  saveData(bootstrapped)
+}
+
 export const useTaskStore = create<TaskStore>((set, get) => {
   function persist() {
-    const { tasks, projects, assignments } = get()
-    saveData({ tasks, projects, assignments })
+    const { tasks, projects, assignments, dayRecords } = get()
+    saveData({ tasks, projects, assignments, dayRecords })
+  }
+
+  function checkAllComplete(date: string) {
+    const state = get()
+    const dayAssignments = Object.values(state.assignments).filter((a) => a.date === date)
+    if (dayAssignments.length === 0) return
+    const allDone = dayAssignments.every((a) => a.done)
+    const existing = state.dayRecords[date]
+
+    if (allDone && !existing?.allCompleteAt) {
+      set((s) => ({
+        dayRecords: {
+          ...s.dayRecords,
+          [date]: { date, closedAt: existing?.closedAt ?? null, allCompleteAt: new Date().toISOString() },
+        },
+      }))
+      persist()
+    } else if (!allDone && existing?.allCompleteAt) {
+      set((s) => ({
+        dayRecords: {
+          ...s.dayRecords,
+          [date]: { ...existing, allCompleteAt: null },
+        },
+      }))
+      persist()
+    }
   }
 
   return {
-    tasks: initial.tasks,
-    projects: initial.projects,
-    assignments: initial.assignments,
+    tasks: bootstrapped.tasks,
+    projects: bootstrapped.projects,
+    assignments: bootstrapped.assignments,
+    dayRecords: bootstrapped.dayRecords,
     activeTab: 'today',
 
     addTask: (input) => {
@@ -176,6 +241,7 @@ export const useTaskStore = create<TaskStore>((set, get) => {
         assignments: { ...s.assignments, [key]: { taskId, date, done: false } },
       }))
       persist()
+      checkAllComplete(date)
     },
 
     unassignFromDay: (taskId, date) => {
@@ -185,6 +251,7 @@ export const useTaskStore = create<TaskStore>((set, get) => {
         return { assignments: remaining }
       })
       persist()
+      checkAllComplete(date)
     },
 
     toggleDailyDone: (taskId, date) => {
@@ -197,6 +264,55 @@ export const useTaskStore = create<TaskStore>((set, get) => {
         }
       })
       persist()
+      checkAllComplete(date)
+    },
+
+    closeDay: (date) => {
+      set((s) => {
+        const existing = s.dayRecords[date]
+        return {
+          dayRecords: {
+            ...s.dayRecords,
+            [date]: {
+              date,
+              closedAt: new Date().toISOString(),
+              allCompleteAt: existing?.allCompleteAt ?? null,
+            },
+          },
+        }
+      })
+      persist()
+    },
+
+    deferTask: (taskId, fromDate, toDate) => {
+      const fromKey = `${taskId}:${fromDate}`
+      const toKey = `${taskId}:${toDate}`
+      set((s) => {
+        const { [fromKey]: _removed, ...remaining } = s.assignments
+        return {
+          assignments: { ...remaining, [toKey]: { taskId, date: toDate, done: false } },
+        }
+      })
+      persist()
+      checkAllComplete(fromDate)
+    },
+
+    markAllComplete: (date) => {
+      set((s) => {
+        const updated = { ...s.assignments }
+        const taskUpdates = { ...s.tasks }
+        for (const [key, a] of Object.entries(updated)) {
+          if (a.date !== date || a.done) continue
+          updated[key] = { ...a, done: true }
+          const task = taskUpdates[a.taskId]
+          if (task?.completionMode === 'checkbox') {
+            taskUpdates[a.taskId] = { ...task, done: true, completedAt: task.completedAt ?? new Date().toISOString() }
+          }
+        }
+        return { assignments: updated, tasks: taskUpdates }
+      })
+      persist()
+      checkAllComplete(date)
     },
 
     setActiveTab: (tab) => set({ activeTab: tab }),
