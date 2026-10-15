@@ -3,12 +3,11 @@ import { Topbar } from './components/Topbar'
 import { Dock } from './components/dock/Dock'
 import { Drawer } from './components/drawer/Drawer'
 import { PixelRoom } from './components/room/PixelRoom'
-import { useWidgetStore, dockAxis } from './stores/widgetStore'
+import { useWidgetStore } from './stores/widgetStore'
 
 export default function App() {
   const dockPosition = useWidgetStore((s) => s.dockPosition)
   const activeWidget = useWidgetStore((s) => s.activeWidget)
-  const isVertical = dockAxis(dockPosition) === 'vertical'
 
   const shellStyle: CSSProperties = {
     height: '100%',

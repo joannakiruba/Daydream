@@ -1,15 +1,41 @@
-import type { CSSProperties } from 'react'
-import { useThemeStore } from '../../stores/themeStore'
+import { useMemo, type CSSProperties } from 'react'
+import { useThemeStore, type SceneId, type WeatherId } from '../../stores/themeStore'
+import { useTaskStore } from '../../stores/taskStore'
+import { computeClutterSlots } from '../../lib/clutterEngine'
+import { today } from '../../lib/dates'
+import { BedroomScene } from './BedroomScene'
 
-const sceneColors: Record<string, { floor: string; wall: string; accent: string }> = {
-  bedroom: { floor: '#2a2540', wall: '#231f33', accent: '#c4b5fd' },
-  cafe: { floor: '#2d2520', wall: '#241f1a', accent: '#f0d08c' },
-  garden: { floor: '#1f2a20', wall: '#1a231b', accent: '#86d9a0' },
+const sceneLabels: Record<SceneId, string> = {
+  bedroom: 'Bedroom',
+  cafe: 'Café',
+  garden: 'Garden',
 }
+
+const weatherLabels: Record<WeatherId, string> = {
+  clear: '☀',
+  rain: '🌧',
+  snow: '❄',
+}
+
+const scenes: SceneId[] = ['bedroom', 'cafe', 'garden']
+const weathers: WeatherId[] = ['clear', 'rain', 'snow']
 
 export function PixelRoom() {
   const scene = useThemeStore((s) => s.scene)
-  const colors = sceneColors[scene]
+  const weather = useThemeStore((s) => s.weather)
+  const animate = useThemeStore((s) => s.animationsEnabled)
+  const setScene = useThemeStore((s) => s.setScene)
+  const setWeather = useThemeStore((s) => s.setWeather)
+  const setAnimate = useThemeStore((s) => s.setAnimationsEnabled)
+
+  const tasks = useTaskStore((s) => s.tasks)
+  const assignments = useTaskStore((s) => s.assignments)
+
+  const todayStr = today()
+  const slots = useMemo(
+    () => computeClutterSlots(tasks, assignments, todayStr),
+    [tasks, assignments, todayStr],
+  )
 
   const containerStyle: CSSProperties = {
     flex: 1,
@@ -19,124 +45,91 @@ export function PixelRoom() {
     justifyContent: 'center',
     position: 'relative',
     overflow: 'hidden',
+    gap: 'var(--space-sm)',
   }
 
-  const roomStyle: CSSProperties = {
-    width: '100%',
-    maxWidth: 640,
-    aspectRatio: '16 / 10',
-    borderRadius: 'var(--radius-lg)',
-    background: `linear-gradient(180deg, ${colors.wall} 0%, ${colors.wall} 55%, ${colors.floor} 55%, ${colors.floor} 100%)`,
-    border: '1px solid var(--color-border)',
-    position: 'relative',
+  const controls: CSSProperties = {
     display: 'flex',
     alignItems: 'center',
+    gap: 'var(--space-sm)',
+    flexWrap: 'wrap',
     justifyContent: 'center',
-    boxShadow: 'var(--shadow-lg)',
-    imageRendering: 'pixelated',
   }
 
-  const windowStyle: CSSProperties = {
-    width: 60,
-    height: 80,
-    borderRadius: 'var(--radius-md)',
-    border: `2px solid ${colors.accent}40`,
-    background: `linear-gradient(180deg, ${colors.accent}15 0%, ${colors.accent}05 100%)`,
-    position: 'absolute',
-    top: '15%',
-    left: '20%',
-  }
-
-  const windowCrossV: CSSProperties = {
-    position: 'absolute',
-    left: '50%',
-    top: 0,
-    bottom: 0,
-    width: 2,
-    background: `${colors.accent}30`,
-    transform: 'translateX(-50%)',
-  }
-
-  const windowCrossH: CSSProperties = {
-    position: 'absolute',
-    top: '50%',
-    left: 0,
-    right: 0,
-    height: 2,
-    background: `${colors.accent}30`,
-    transform: 'translateY(-50%)',
-  }
-
-  const deskStyle: CSSProperties = {
-    width: 120,
-    height: 50,
-    borderRadius: 'var(--radius-sm) var(--radius-sm) 0 0',
-    background: `${colors.accent}18`,
-    border: `1px solid ${colors.accent}20`,
-    borderBottom: 'none',
-    position: 'absolute',
-    bottom: '0%',
-    right: '25%',
-  }
-
-  const lampStyle: CSSProperties = {
-    width: 16,
-    height: 24,
-    borderRadius: '8px 8px 2px 2px',
-    background: `${colors.accent}25`,
-    border: `1px solid ${colors.accent}30`,
-    position: 'absolute',
-    bottom: 50,
-    right: 'calc(25% + 15px)',
-  }
-
-  const lampGlow: CSSProperties = {
-    width: 40,
-    height: 40,
-    borderRadius: '50%',
-    background: `radial-gradient(circle, ${colors.accent}15 0%, transparent 70%)`,
-    position: 'absolute',
-    bottom: 52,
-    right: 'calc(25% + 3px)',
-    pointerEvents: 'none',
-  }
-
-  const rugStyle: CSSProperties = {
-    width: 140,
-    height: 30,
+  const pill = (active: boolean): CSSProperties => ({
+    fontSize: 11,
+    padding: '3px 10px',
     borderRadius: 'var(--radius-xl)',
-    background: `${colors.accent}10`,
-    border: `1px solid ${colors.accent}12`,
-    position: 'absolute',
-    bottom: '10%',
-    left: '15%',
-  }
+    background: active ? 'var(--color-accent-glow)' : 'var(--color-bg-overlay)',
+    color: active ? 'var(--color-accent)' : 'var(--color-text-muted)',
+    border: `1px solid ${active ? 'var(--color-accent-dim)' : 'var(--color-border)'}`,
+    cursor: 'pointer',
+    transition: 'all var(--transition-fast)',
+    fontWeight: active ? 600 : 400,
+  })
 
-  const labelStyle: CSSProperties = {
-    position: 'absolute',
-    bottom: 'var(--space-lg)',
-    left: '50%',
-    transform: 'translateX(-50%)',
+  const toggle: CSSProperties = {
+    fontSize: 11,
+    padding: '3px 10px',
+    borderRadius: 'var(--radius-xl)',
+    background: animate ? 'var(--color-bg-overlay)' : 'var(--color-bg-hover)',
     color: 'var(--color-text-muted)',
-    fontSize: 12,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    opacity: 0.6,
+    border: '1px solid var(--color-border)',
+    cursor: 'pointer',
+    transition: 'all var(--transition-fast)',
   }
 
   return (
     <div style={containerStyle}>
-      <div style={roomStyle}>
-        <div style={windowStyle}>
-          <div style={windowCrossV} />
-          <div style={windowCrossH} />
-        </div>
-        <div style={rugStyle} />
-        <div style={deskStyle} />
-        <div style={lampStyle} />
-        <div style={lampGlow} />
+      {scene === 'bedroom' ? (
+        <BedroomScene slots={slots} weather={weather} animate={animate} />
+      ) : (
+        <PlaceholderScene scene={scene} />
+      )}
+
+      <div style={controls}>
+        {scenes.map((s) => (
+          <button key={s} style={pill(scene === s)} onClick={() => setScene(s)}>
+            {sceneLabels[s]}
+          </button>
+        ))}
+        <span style={{ width: 1, height: 16, background: 'var(--color-border)' }} />
+        {weathers.map((w) => (
+          <button key={w} style={pill(weather === w)} onClick={() => setWeather(w)}>
+            {weatherLabels[w]}
+          </button>
+        ))}
+        <span style={{ width: 1, height: 16, background: 'var(--color-border)' }} />
+        <button style={toggle} onClick={() => setAnimate(!animate)}>
+          {animate ? '⏸ Static' : '▶ Animate'}
+        </button>
       </div>
-      <span style={labelStyle}>{scene}</span>
     </div>
   )
+}
+
+function PlaceholderScene({ scene }: { scene: SceneId }) {
+  const colors: Record<SceneId, { wall: string; floor: string }> = {
+    bedroom: { wall: '#231f33', floor: '#2a2540' },
+    cafe: { wall: '#241f1a', floor: '#2d2520' },
+    garden: { wall: '#1a231b', floor: '#1f2a20' },
+  }
+  const c = colors[scene]
+  const style: CSSProperties = {
+    width: '100%',
+    maxWidth: 640,
+    aspectRatio: '16 / 10',
+    borderRadius: 'var(--radius-lg)',
+    background: `linear-gradient(180deg, ${c.wall} 0%, ${c.wall} 55%, ${c.floor} 55%, ${c.floor} 100%)`,
+    border: '1px solid var(--color-border)',
+    boxShadow: 'var(--shadow-lg)',
+    imageRendering: 'pixelated',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: 'var(--color-text-muted)',
+    fontSize: 13,
+    fontStyle: 'italic',
+  }
+  return <div style={style}>{sceneLabels[scene]} — coming soon</div>
 }
