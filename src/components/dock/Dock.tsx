@@ -10,6 +10,7 @@ const widgets: { id: WidgetId; label: string; icon: string }[] = [
   { id: 'calendar', label: 'Calendar', icon: '▦' },
   { id: 'countdowns', label: 'Countdowns', icon: '⏳' },
   { id: 'review', label: 'Review', icon: '★' },
+  { id: 'theme', label: 'Theme', icon: '◐' },
 ]
 
 const positionArrows: Record<string, string> = {

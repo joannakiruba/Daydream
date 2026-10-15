@@ -8,6 +8,7 @@ import { JournalWidget } from '../widgets/JournalWidget'
 import { DailyReviewWidget } from '../widgets/DailyReviewWidget'
 import { CalendarWidget } from '../widgets/CalendarWidget'
 import { CountdownWidget } from '../widgets/CountdownWidget'
+import { ThemeStudioWidget } from '../widgets/ThemeStudioWidget'
 
 const widgetLabels: Record<WidgetId, string> = {
   tasks: 'Tasks',
@@ -17,6 +18,7 @@ const widgetLabels: Record<WidgetId, string> = {
   calendar: 'Calendar',
   countdowns: 'Countdowns',
   review: 'Daily Review',
+  theme: 'Theme Studio',
 }
 
 const widgetIcons: Record<WidgetId, string> = {
@@ -27,6 +29,7 @@ const widgetIcons: Record<WidgetId, string> = {
   calendar: '▦',
   countdowns: '⏳',
   review: '★',
+  theme: '◐',
 }
 
 function getContainerStyle(pos: DockPosition, isOpen: boolean): CSSProperties {
@@ -168,6 +171,7 @@ export function Drawer() {
               {activeWidget === 'review' && <DailyReviewWidget />}
               {activeWidget === 'calendar' && <CalendarWidget />}
               {activeWidget === 'countdowns' && <CountdownWidget />}
+              {activeWidget === 'theme' && <ThemeStudioWidget />}
             </div>
           </motion.div>
         )}

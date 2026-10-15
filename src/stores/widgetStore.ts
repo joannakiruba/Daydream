@@ -8,6 +8,7 @@ export type WidgetId =
   | 'calendar'
   | 'countdowns'
   | 'review'
+  | 'theme'
 
 export type DockPosition = 'left' | 'right' | 'top' | 'bottom'
 

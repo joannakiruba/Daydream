@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react'
 import type { ClutterSlot } from '../../lib/clutterEngine'
-import type { WeatherId } from '../../stores/themeStore'
+import type { WeatherId, ScenePalette } from '../../stores/themeStore'
 import { RainEffect, WindowRain } from './RainEffect'
 
 interface BedroomSceneProps {
@@ -8,26 +8,18 @@ interface BedroomSceneProps {
   weather: WeatherId
   animate: boolean
   restored?: boolean
+  palette?: ScenePalette
 }
 
-/* ── palette ── */
-const P = {
-  wall: '#252038',
-  wallHi: '#2d2842',
-  floor: '#2e2848',
-  floorHi: '#362f52',
-  wood: '#3a3450',
-  woodLt: '#4a4065',
-  accent: '#c4b5fd',
-  accentDim: '#8b7cc8',
-  blanket: '#c4b5fd',
-  pillow: '#ddd6fe',
-  sky: '#1e2540',
-  skyRain: '#283050',
-  glass: 'rgba(140,160,220,0.08)',
-  glassRain: 'rgba(140,160,220,0.15)',
-  rug1: 'rgba(196,181,253,0.08)',
-  rug2: 'rgba(196,181,253,0.04)',
+/* ── palette (set per-render from prop) ── */
+let P: ScenePalette = {
+  wall: '#252038', wallHi: '#2d2842',
+  floor: '#2e2848', floorHi: '#362f52',
+  wood: '#3a3450', woodLt: '#4a4065',
+  accent: '#c4b5fd', accentDim: '#8b7cc8',
+  blanket: '#c4b5fd', pillow: '#ddd6fe',
+  sky: '#1e2540', skyRain: '#283050',
+  rug1: 'rgba(196,181,253,0.08)', rug2: 'rgba(196,181,253,0.04)',
 }
 
 const abs = (extra: CSSProperties): CSSProperties => ({
@@ -90,15 +82,15 @@ function Bookshelf() {
         <div style={shelf('30%')} />
         <div style={shelf('60%')} />
         <div style={book('12%', '8%', 6, 18, P.accentDim)} />
-        <div style={book('26%', '10%', 5, 16, '#a594e0')} />
+        <div style={book('26%', '10%', 5, 16, P.accent)} />
         <div style={book('38%', '9%', 7, 17, P.accent)} />
-        <div style={book('55%', '12%', 5, 14, '#9087b0')} />
-        <div style={book('14%', '35%', 6, 20, '#b09ce0')} />
+        <div style={book('55%', '12%', 5, 14, P.woodLt)} />
+        <div style={book('14%', '35%', 6, 20, P.accentDim)} />
         <div style={book('28%', '38%', 5, 17, P.accentDim)} />
-        <div style={book('50%', '36%', 7, 19, '#a090c8')} />
+        <div style={book('50%', '36%', 7, 19, P.accent)} />
         <div style={book('12%', '65%', 5, 18, P.accent)} />
-        <div style={book('25%', '67%', 6, 16, '#8b7cc8')} />
-        <div style={book('42%', '64%', 5, 19, '#b5a8e0')} />
+        <div style={book('25%', '67%', 6, 16, P.accentDim)} />
+        <div style={book('42%', '64%', 5, 19, P.accent)} />
       </div>
     </div>
   )
@@ -152,7 +144,7 @@ function Bed() {
   })
   const mattress: CSSProperties = abs({
     left: '4%', right: '4%', top: '20%', bottom: '4%',
-    background: '#363050', borderRadius: 3,
+    background: P.wallHi, borderRadius: 3,
   })
   const blanket: CSSProperties = abs({
     left: '6%', right: '6%', top: '35%', bottom: '6%',
@@ -389,7 +381,9 @@ function RestorationOverlay({ animate }: { animate: boolean }) {
 
 /* ── Main scene ── */
 
-export function BedroomScene({ slots, weather, animate, restored }: BedroomSceneProps) {
+export function BedroomScene({ slots, weather, animate, restored, palette }: BedroomSceneProps) {
+  if (palette) P = palette
+
   const isRaining = weather === 'rain'
   const isSnowing = weather === 'snow'
 
