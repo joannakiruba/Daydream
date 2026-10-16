@@ -1,18 +1,12 @@
 import { useState, useEffect, type CSSProperties } from 'react'
 import { useThemeStore } from '../../stores/themeStore'
-import { PRESETS, type WeatherId, type SeasonId } from '../../lib/themes'
+import { PRESETS, type SeasonId } from '../../lib/themes'
 import { PixelIcon } from '../PixelIcon'
 
 const ACCENT_SWATCHES = [
   '#c4b5fd', '#f0a878', '#7888c0', '#90d890',
   '#e8a0d0', '#e0a050', '#a0c8e8', '#f08888',
   '#88d0b8', '#c8c080', '#b088d0', '#80b8d0',
-]
-
-const WEATHER_OPTIONS: { id: WeatherId; label: string; iconName: string }[] = [
-  { id: 'clear', label: 'Clear', iconName: 'sun' },
-  { id: 'rain', label: 'Rain', iconName: 'rain' },
-  { id: 'snow', label: 'Snow', iconName: 'snow' },
 ]
 
 const SEASONS: { id: SeasonId; label: string }[] = [
@@ -25,10 +19,9 @@ const SEASONS: { id: SeasonId; label: string }[] = [
 
 export function ThemeStudioWidget() {
   const {
-    presetId, customAccent, weatherOverride, animationSpeed,
+    presetId, customAccent,
     respectReducedMotion, reducedMotionActive,
-    setPreset, setCustomAccent, setWeatherOverride,
-    setAnimationSpeed, setRespectReducedMotion, preset,
+    setPreset, setCustomAccent, setRespectReducedMotion,
   } = useThemeStore()
 
   const [seasonFilter, setSeasonFilter] = useState<SeasonId>('default')
@@ -101,15 +94,13 @@ export function ThemeStudioWidget() {
   const presetPreview = (p: typeof PRESETS[0]): CSSProperties => ({
     height: 24,
     borderRadius: 3,
-    background: `linear-gradient(135deg, ${p.scene.wall} 0%, ${p.scene.accent}40 50%, ${p.scene.floor} 100%)`,
+    background: `linear-gradient(135deg, ${p.ui.bgBase} 0%, ${p.ui.accent}40 50%, ${p.ui.bgOverlay} 100%)`,
     border: '1px solid rgba(255,255,255,0.04)',
   })
 
   const presetMeta: CSSProperties = {
     fontSize: 10,
     color: 'var(--color-text-muted)',
-    display: 'flex',
-    gap: 'var(--space-xs)',
   }
 
   const pillRow: CSSProperties = {
@@ -145,21 +136,6 @@ export function ThemeStudioWidget() {
     cursor: 'pointer',
     transition: 'border-color var(--transition-fast)',
   })
-
-  const sliderRow: CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 'var(--space-sm)',
-  }
-
-  const sliderStyle: CSSProperties = {
-    flex: 1,
-    appearance: 'auto',
-    height: 4,
-    borderRadius: 2,
-    cursor: 'pointer',
-    accentColor: 'var(--color-accent)',
-  }
 
   const checkRow: CSSProperties = {
     display: 'flex',
@@ -199,11 +175,9 @@ export function ThemeStudioWidget() {
     fontFamily: 'var(--font-mono)',
   }
 
-  const activeWeather = weatherOverride ?? preset.weather
-
   return (
     <div style={container}>
-      {/* ── Season filter ── */}
+      {/* Season filter */}
       <div style={section}>
         <div style={sectionLabel}>Season</div>
         <div style={pillRow}>
@@ -215,7 +189,7 @@ export function ThemeStudioWidget() {
         </div>
       </div>
 
-      {/* ── Presets ── */}
+      {/* Presets */}
       <div style={section}>
         <div style={sectionLabel}>Presets</div>
         <div style={presetGrid}>
@@ -223,16 +197,13 @@ export function ThemeStudioWidget() {
             <button key={p.id} style={presetCard(presetId === p.id)} onClick={() => setPreset(p.id)}>
               <div style={presetPreview(p)} />
               <div style={presetName}>{p.name}</div>
-              <div style={presetMeta}>
-                <PixelIcon name={p.weather === 'rain' ? 'rain' : p.weather === 'snow' ? 'snow' : 'sun'} size={10} />
-                {p.season !== 'default' && <span>{p.season}</span>}
-              </div>
+              {p.season !== 'default' && <div style={presetMeta}>{p.season}</div>}
             </button>
           ))}
         </div>
       </div>
 
-      {/* ── Accent color ── */}
+      {/* Accent color */}
       <div style={section}>
         <div style={sectionLabel}>Accent Color</div>
         <div style={swatchGrid}>
@@ -290,49 +261,7 @@ export function ThemeStudioWidget() {
         )}
       </div>
 
-      {/* ── Weather ── */}
-      <div style={section}>
-        <div style={sectionLabel}>Weather</div>
-        <div style={pillRow}>
-          {WEATHER_OPTIONS.map((w) => (
-            <button key={w.id} style={{ ...pill(activeWeather === w.id), display: 'inline-flex', alignItems: 'center', gap: 4 }} onClick={() => setWeatherOverride(activeWeather === w.id && weatherOverride !== null ? null : w.id)}>
-              <PixelIcon name={w.iconName} size={12} /> {w.label}
-            </button>
-          ))}
-        </div>
-        {weatherOverride && (
-          <button
-            style={{ fontSize: 11, color: 'var(--color-text-muted)', textAlign: 'left' }}
-            onClick={() => setWeatherOverride(null)}
-          >
-            Reset to preset weather
-          </button>
-        )}
-      </div>
-
-      {/* ── Animation ── */}
-      <div style={section}>
-        <div style={sectionLabel}>Animation</div>
-        <div style={sliderRow}>
-          <span style={{ fontSize: 11, color: 'var(--color-text-muted)', minWidth: 24 }}>Off</span>
-          <input
-            type="range"
-            min={0}
-            max={1}
-            step={0.1}
-            value={animationSpeed}
-            onChange={(e) => setAnimationSpeed(parseFloat(e.target.value))}
-            style={sliderStyle}
-            aria-label="Animation speed"
-          />
-          <span style={{ fontSize: 11, color: 'var(--color-text-muted)', minWidth: 24, textAlign: 'right' }}>Full</span>
-        </div>
-        <div style={{ fontSize: 11, color: 'var(--color-text-muted)', textAlign: 'center' }}>
-          {animationSpeed === 0 ? 'Static' : `${Math.round(animationSpeed * 100)}%`}
-        </div>
-      </div>
-
-      {/* ── Reduced motion ── */}
+      {/* Accessibility */}
       <div style={section}>
         <div style={sectionLabel}>Accessibility</div>
         <button style={checkRow} onClick={() => setRespectReducedMotion(!respectReducedMotion)} role="checkbox" aria-checked={respectReducedMotion}>

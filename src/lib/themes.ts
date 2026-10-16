@@ -1,20 +1,3 @@
-export interface ScenePalette {
-  wall: string
-  wallHi: string
-  floor: string
-  floorHi: string
-  wood: string
-  woodLt: string
-  accent: string
-  accentDim: string
-  blanket: string
-  pillow: string
-  sky: string
-  skyRain: string
-  rug1: string
-  rug2: string
-}
-
 export interface UITokens {
   bgBase: string
   bgRaised: string
@@ -33,91 +16,13 @@ export interface UITokens {
   borderFocus: string
 }
 
-export type WeatherId = 'clear' | 'rain' | 'snow'
 export type SeasonId = 'default' | 'spring' | 'summer' | 'autumn' | 'winter'
 
 export interface ThemePreset {
   id: string
   name: string
   season: SeasonId
-  scene: ScenePalette
   ui: UITokens
-  weather: WeatherId
-  animationSpeed: number
-}
-
-/* ── Scene palettes ── */
-
-const bedroomScene: ScenePalette = {
-  wall: '#252038', wallHi: '#2d2842',
-  floor: '#2e2848', floorHi: '#362f52',
-  wood: '#3a3450', woodLt: '#4a4065',
-  accent: '#c4b5fd', accentDim: '#8b7cc8',
-  blanket: '#c4b5fd', pillow: '#ddd6fe',
-  sky: '#1e2540', skyRain: '#283050',
-  rug1: 'rgba(196,181,253,0.08)', rug2: 'rgba(196,181,253,0.04)',
-}
-
-const sunsetScene: ScenePalette = {
-  wall: '#2a2030', wallHi: '#352838',
-  floor: '#302028', floorHi: '#3d2830',
-  wood: '#3e2e38', woodLt: '#504050',
-  accent: '#f0a878', accentDim: '#c87850',
-  blanket: '#f0a878', pillow: '#fcd8b8',
-  sky: '#c06030', skyRain: '#704030',
-  rug1: 'rgba(240,168,120,0.08)', rug2: 'rgba(240,168,120,0.04)',
-}
-
-const midnightScene: ScenePalette = {
-  wall: '#10101e', wallHi: '#181828',
-  floor: '#141420', floorHi: '#1c1c30',
-  wood: '#1e1e32', woodLt: '#2a2a42',
-  accent: '#7888c0', accentDim: '#506090',
-  blanket: '#7888c0', pillow: '#a0b0d8',
-  sky: '#080818', skyRain: '#101028',
-  rug1: 'rgba(120,136,192,0.08)', rug2: 'rgba(120,136,192,0.04)',
-}
-
-/* ── Spring / Summer / Autumn / Winter palettes ── */
-
-const springScene: ScenePalette = {
-  wall: '#202830', wallHi: '#283038',
-  floor: '#243028', floorHi: '#2c3830',
-  wood: '#304028', woodLt: '#405030',
-  accent: '#90d890', accentDim: '#60a060',
-  blanket: '#b8e8b0', pillow: '#d0f0c8',
-  sky: '#304060', skyRain: '#283848',
-  rug1: 'rgba(144,216,144,0.08)', rug2: 'rgba(144,216,144,0.04)',
-}
-
-const summerScene: ScenePalette = {
-  wall: '#282030', wallHi: '#302838',
-  floor: '#302838', floorHi: '#383040',
-  wood: '#3a3040', woodLt: '#4a4050',
-  accent: '#e8a0d0', accentDim: '#b870a0',
-  blanket: '#e8a0d0', pillow: '#f0c8e0',
-  sky: '#283058', skyRain: '#202848',
-  rug1: 'rgba(232,160,208,0.08)', rug2: 'rgba(232,160,208,0.04)',
-}
-
-const autumnScene: ScenePalette = {
-  wall: '#282018', wallHi: '#302820',
-  floor: '#2a2018', floorHi: '#342820',
-  wood: '#3c3020', woodLt: '#4e4030',
-  accent: '#e0a050', accentDim: '#b07830',
-  blanket: '#e0a050', pillow: '#f0c888',
-  sky: '#302018', skyRain: '#282018',
-  rug1: 'rgba(224,160,80,0.08)', rug2: 'rgba(224,160,80,0.04)',
-}
-
-const winterScene: ScenePalette = {
-  wall: '#181828', wallHi: '#202030',
-  floor: '#1c1c30', floorHi: '#242438',
-  wood: '#282840', woodLt: '#383850',
-  accent: '#a0c8e8', accentDim: '#6898c0',
-  blanket: '#a0c8e8', pillow: '#c8e0f0',
-  sky: '#101020', skyRain: '#181830',
-  rug1: 'rgba(160,200,232,0.08)', rug2: 'rgba(160,200,232,0.04)',
 }
 
 /* ── UI token sets ── */
@@ -163,13 +68,13 @@ const winterUI: UITokens = {
 /* ── Presets ── */
 
 export const PRESETS: ThemePreset[] = [
-  { id: 'rainy-bedroom', name: 'Rainy Bedroom', season: 'default', scene: bedroomScene, ui: defaultUI, weather: 'rain', animationSpeed: 1 },
-  { id: 'sunset-room', name: 'Warm Sunset', season: 'default', scene: sunsetScene, ui: sunsetUI, weather: 'clear', animationSpeed: 1 },
-  { id: 'midnight-study', name: 'Midnight Study', season: 'default', scene: midnightScene, ui: midnightUI, weather: 'clear', animationSpeed: 0.6 },
-  { id: 'spring-morning', name: 'Spring Morning', season: 'spring', scene: springScene, ui: springUI, weather: 'rain', animationSpeed: 1 },
-  { id: 'summer-dusk', name: 'Summer Dusk', season: 'summer', scene: summerScene, ui: summerUI, weather: 'clear', animationSpeed: 1 },
-  { id: 'autumn-cozy', name: 'Autumn Cozy', season: 'autumn', scene: autumnScene, ui: autumnUI, weather: 'clear', animationSpeed: 0.8 },
-  { id: 'winter-frost', name: 'Winter Frost', season: 'winter', scene: winterScene, ui: winterUI, weather: 'snow', animationSpeed: 0.7 },
+  { id: 'cozy-violet', name: 'Cozy Violet', season: 'default', ui: defaultUI },
+  { id: 'warm-sunset', name: 'Warm Sunset', season: 'default', ui: sunsetUI },
+  { id: 'midnight-blue', name: 'Midnight Blue', season: 'default', ui: midnightUI },
+  { id: 'spring-morning', name: 'Spring Morning', season: 'spring', ui: springUI },
+  { id: 'summer-dusk', name: 'Summer Dusk', season: 'summer', ui: summerUI },
+  { id: 'autumn-cozy', name: 'Autumn Cozy', season: 'autumn', ui: autumnUI },
+  { id: 'winter-frost', name: 'Winter Frost', season: 'winter', ui: winterUI },
 ]
 
 export function getPreset(id: string): ThemePreset {

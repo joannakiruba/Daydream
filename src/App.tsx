@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react'
 import { Topbar } from './components/Topbar'
 import { Dock } from './components/dock/Dock'
 import { Drawer } from './components/drawer/Drawer'
-import { PixelRoom } from './components/room/PixelRoom'
+import { PizzaScene } from './components/pizza/PizzaScene'
 import { useWidgetStore } from './stores/widgetStore'
 
 export default function App() {
@@ -51,7 +51,7 @@ export default function App() {
         <Dock />
         <Drawer />
         <main style={workspaceStyle}>
-          <PixelRoom />
+          <PizzaScene />
         </main>
       </div>
     </div>

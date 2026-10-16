@@ -327,7 +327,7 @@ function TodayView() {
       {/* All-complete celebration banner */}
       {allDone && !dayClosed && (
         <div style={bannerStyle('var(--color-success)')}>
-          All tasks complete! Your room is restored.
+          All tasks complete! Pizza is ready!
         </div>
       )}
 
