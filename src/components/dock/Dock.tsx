@@ -1,23 +1,23 @@
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { useWidgetStore, dockAxis, type WidgetId } from '../../stores/widgetStore'
 import { DockIcon } from './DockIcon'
+import { PixelIcon } from '../PixelIcon'
 
-const widgets: { id: WidgetId; label: string; icon: string }[] = [
-  { id: 'tasks', label: 'Tasks', icon: '☑' },
-  { id: 'journal', label: 'Journal', icon: '✎' },
-  { id: 'scratchpad', label: 'Scratchpad', icon: '✐' },
-  { id: 'capture', label: 'Capture', icon: '⚡' },
-  { id: 'calendar', label: 'Calendar', icon: '▦' },
-  { id: 'countdowns', label: 'Countdowns', icon: '⏳' },
-  { id: 'review', label: 'Review', icon: '★' },
-  { id: 'theme', label: 'Theme', icon: '◐' },
+const widgets: { id: WidgetId; label: string; icon: ReactNode }[] = [
+  { id: 'tasks', label: 'Tasks', icon: <PixelIcon name="tasks" size={18} /> },
+  { id: 'journal', label: 'Journal', icon: <PixelIcon name="journal" size={18} /> },
+  { id: 'scratchpad', label: 'Scratchpad', icon: <PixelIcon name="scratchpad" size={18} /> },
+  { id: 'calendar', label: 'Calendar', icon: <PixelIcon name="calendar" size={18} /> },
+  { id: 'countdowns', label: 'Countdowns', icon: <PixelIcon name="countdowns" size={18} /> },
+  { id: 'review', label: 'Review', icon: <PixelIcon name="review" size={18} /> },
+  { id: 'theme', label: 'Theme', icon: <PixelIcon name="theme" size={18} /> },
 ]
 
-const positionArrows: Record<string, string> = {
-  left: '→',
-  top: '↓',
-  right: '←',
-  bottom: '↑',
+const positionIcons: Record<string, string> = {
+  left: 'chevron-right',
+  top: 'chevron-down',
+  right: 'chevron-left',
+  bottom: 'chevron-up',
 }
 
 export function Dock() {
@@ -85,11 +85,11 @@ export function Dock() {
         style={cyclerStyle}
         onClick={cycleDockPosition}
         aria-label={`Move dock (currently ${dockPosition})`}
-        title={`Move dock ${positionArrows[dockPosition]}`}
+        title={`Move dock (currently ${dockPosition})`}
         onMouseEnter={(e) => { e.currentTarget.style.opacity = '1' }}
         onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.5' }}
       >
-        {positionArrows[dockPosition]}
+        <PixelIcon name={positionIcons[dockPosition]} size={12} />
       </button>
     </nav>
   )

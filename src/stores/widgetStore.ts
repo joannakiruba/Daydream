@@ -4,7 +4,6 @@ export type WidgetId =
   | 'tasks'
   | 'journal'
   | 'scratchpad'
-  | 'capture'
   | 'calendar'
   | 'countdowns'
   | 'review'
@@ -31,7 +30,7 @@ export function drawerSide(pos: DockPosition): 'left' | 'right' | 'top' | 'botto
 const STORAGE_KEY = 'daydream:widget-state'
 
 const VALID_POSITIONS = new Set<string>(['left', 'right', 'top', 'bottom'])
-const VALID_WIDGETS = new Set<string>(['tasks', 'journal', 'scratchpad', 'capture', 'calendar', 'countdowns', 'review', 'theme'])
+const VALID_WIDGETS = new Set<string>(['tasks', 'journal', 'scratchpad', 'calendar', 'countdowns', 'review', 'theme'])
 
 function loadPersisted(): { dockPosition: DockPosition; activeWidget: WidgetId | null } {
   try {

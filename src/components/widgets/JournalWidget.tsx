@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, type CSSProperties } from 'react'
 import { useJournalStore } from '../../stores/journalStore'
 import { today, addDays, formatDate } from '../../lib/dates'
+import { PixelIcon } from '../PixelIcon'
 
 export function JournalWidget() {
   const entries = useJournalStore((s) => s.entries)
@@ -153,7 +154,7 @@ export function JournalWidget() {
           onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-bg-hover)' }}
           onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
         >
-          ‹
+          <PixelIcon name="chevron-left" size={12} />
         </button>
         <span style={dateLabel}>
           {isToday ? 'Today' : formatDate(selectedDate)}
@@ -164,7 +165,7 @@ export function JournalWidget() {
           onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-bg-hover)' }}
           onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
         >
-          ›
+          <PixelIcon name="chevron-right" size={12} />
         </button>
         {!isToday && (
           <button
@@ -172,7 +173,7 @@ export function JournalWidget() {
             onClick={() => setSelectedDate(today())}
             title="Jump to today"
           >
-            ●
+            <PixelIcon name="today" size={10} />
           </button>
         )}
       </div>

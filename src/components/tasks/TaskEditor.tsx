@@ -5,9 +5,9 @@ import { useTaskStore } from '../../stores/taskStore'
 const PROJECT_COLORS = ['#c4b5fd', '#86d9a0', '#f0d08c', '#f0918c', '#8cc8f0', '#e0a0d0']
 
 const modes: { value: CompletionMode; label: string }[] = [
-  { value: 'checkbox', label: '☑ Check' },
-  { value: 'percentage', label: '▓ Percent' },
-  { value: 'subtask', label: '⊞ Subtasks' },
+  { value: 'checkbox', label: 'Check' },
+  { value: 'percentage', label: 'Percent' },
+  { value: 'subtask', label: 'Subtasks' },
 ]
 
 const priorities: Priority[] = [1, 2, 3, 4]

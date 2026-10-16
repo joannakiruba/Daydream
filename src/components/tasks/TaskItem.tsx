@@ -4,6 +4,7 @@ import { useTaskStore } from '../../stores/taskStore'
 import { getSubtasks, computePercent } from '../../lib/taskHelpers'
 import { formatDate, daysUntil, formatTimeEstimate, today } from '../../lib/dates'
 import { TaskEditor } from './TaskEditor'
+import { PixelIcon } from '../PixelIcon'
 
 const priorityColors: Record<Priority, string> = {
   1: 'var(--color-text-muted)',
@@ -150,7 +151,7 @@ export function TaskItem({ taskId, depth = 0, showDailyToggle, dailyDate }: Task
   const checkStyle: CSSProperties = {
     width: checkSize,
     height: checkSize,
-    borderRadius: showDailyToggle ? checkSize / 2 : 4,
+    borderRadius: 0,
     border: `2px solid ${isDone ? 'var(--color-accent)' : 'var(--color-text-muted)'}`,
     background: isDone ? 'var(--color-accent)' : 'transparent',
     display: 'flex',
@@ -219,7 +220,7 @@ export function TaskItem({ taskId, depth = 0, showDailyToggle, dailyDate }: Task
         {/* Completion control */}
         {(task.completionMode === 'checkbox' || showDailyToggle) && (
           <button style={checkStyle} onClick={handleToggleDone} aria-label="Toggle done">
-            ✓
+            <PixelIcon name="check" size={10} color={isDone ? 'var(--color-bg-base)' : 'transparent'} />
           </button>
         )}
         {task.completionMode === 'percentage' && !showDailyToggle && (
@@ -248,7 +249,7 @@ export function TaskItem({ taskId, depth = 0, showDailyToggle, dailyDate }: Task
               <span style={titleStyle}>{task.title}</span>
             )}
             {task.priority >= 3 && (
-              <span style={{ width: 7, height: 7, borderRadius: '50%', background: priorityColors[task.priority], flexShrink: 0 }} />
+              <span style={{ width: 7, height: 7, borderRadius: 0, background: priorityColors[task.priority], flexShrink: 0 }} />
             )}
           </div>
 
@@ -293,7 +294,7 @@ export function TaskItem({ taskId, depth = 0, showDailyToggle, dailyDate }: Task
                   style={{ ...badgeBase, color: 'var(--color-text-muted)', cursor: 'pointer', border: 'none', background: 'var(--color-bg-base)' }}
                   onClick={() => setExpanded(!expanded)}
                 >
-                  {expanded ? '▾' : '▸'} {subtasks.length} subtask{subtasks.length !== 1 ? 's' : ''}
+                  {expanded ? <PixelIcon name="chevron-down" size={10} style={{ display: 'inline-block', verticalAlign: 'middle' }} /> : <PixelIcon name="chevron-right" size={10} style={{ display: 'inline-block', verticalAlign: 'middle' }} />} {subtasks.length} subtask{subtasks.length !== 1 ? 's' : ''}
                 </button>
               )}
             </div>
@@ -301,16 +302,16 @@ export function TaskItem({ taskId, depth = 0, showDailyToggle, dailyDate }: Task
         </div>
 
         {/* Actions */}
-        <button style={actionBtn} onClick={() => setEditing(true)} title="Edit">✎</button>
-        <button style={actionBtn} onClick={() => { setAddingChild(true); setExpanded(true) }} title="Add subtask">+</button>
+        <button style={actionBtn} onClick={() => setEditing(true)} title="Edit"><PixelIcon name="edit" size={12} /></button>
+        <button style={actionBtn} onClick={() => { setAddingChild(true); setExpanded(true) }} title="Add subtask"><PixelIcon name="plus" size={12} /></button>
         {!showDailyToggle && !isAssignedToday && (
-          <button style={actionBtn} onClick={() => assignToDay(taskId, todayStr)} title="Assign to today">📅</button>
+          <button style={actionBtn} onClick={() => assignToDay(taskId, todayStr)} title="Assign to today"><PixelIcon name="today" size={12} /></button>
         )}
         <button
           style={{ ...actionBtn, color: hovered ? 'var(--color-danger)' : 'var(--color-text-muted)' }}
           onClick={() => deleteTask(taskId)}
           title="Delete"
-        >×</button>
+        ><PixelIcon name="trash" size={12} /></button>
       </div>
 
       {/* Expanded subtasks */}
@@ -343,7 +344,7 @@ export function TaskItem({ taskId, depth = 0, showDailyToggle, dailyDate }: Task
               <button
                 style={{ fontSize: 11, color: 'var(--color-text-muted)', padding: '4px' }}
                 onClick={() => { setAddingChild(false); setChildTitle('') }}
-              >✕</button>
+              ><PixelIcon name="close" size={10} /></button>
             </div>
           )}
         </div>

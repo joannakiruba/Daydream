@@ -3,6 +3,7 @@ import { useTaskStore } from '../../stores/taskStore'
 import { getProjectTasks, computePercent } from '../../lib/taskHelpers'
 import { TaskItem } from './TaskItem'
 import { PROJECT_COLORS } from './TaskEditor'
+import { PixelIcon } from '../PixelIcon'
 
 export function ProjectCard({ projectId }: { projectId: string }) {
   const project = useTaskStore((s) => s.projects[projectId])
@@ -59,7 +60,7 @@ export function ProjectCard({ projectId }: { projectId: string }) {
   const dot: CSSProperties = {
     width: 10,
     height: 10,
-    borderRadius: '50%',
+    borderRadius: 0,
     background: project.color,
     flexShrink: 0,
   }
@@ -112,7 +113,7 @@ export function ProjectCard({ projectId }: { projectId: string }) {
         <span style={dot} />
         <span style={titleText}>{project.title}</span>
         <span style={countText}>{doneCount}/{tasks.length}</span>
-        <span style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>{expanded ? '▾' : '▸'}</span>
+        <span style={{ color: 'var(--color-text-muted)' }}>{expanded ? <PixelIcon name="chevron-down" size={10} /> : <PixelIcon name="chevron-right" size={10} />}</span>
       </div>
       {tasks.length > 0 && (
         <div style={{ padding: '0 var(--space-sm) 6px' }}>
@@ -137,7 +138,7 @@ export function ProjectCard({ projectId }: { projectId: string }) {
                 style={{
                   width: 20,
                   height: 20,
-                  borderRadius: '50%',
+                  borderRadius: 0,
                   background: c,
                   border: c === editColor ? '2px solid var(--color-text-primary)' : '2px solid transparent',
                   cursor: 'pointer',
@@ -169,7 +170,7 @@ export function ProjectCard({ projectId }: { projectId: string }) {
               type="button"
               style={{ fontSize: 11, color: 'var(--color-text-muted)' }}
               onClick={startEdit}
-            >✎ Edit</button>
+            ><PixelIcon name="edit" size={10} style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: 4 }} /> Edit</button>
           </div>
           {tasks.map((t) => (
             <TaskItem key={t.id} taskId={t.id} />
@@ -187,7 +188,7 @@ export function ProjectCard({ projectId }: { projectId: string }) {
                   if (e.key === 'Escape') { setAddingTask(false); setNewTitle('') }
                 }}
               />
-              <button type="button" style={{ fontSize: 11, color: 'var(--color-text-muted)' }} onClick={() => { setAddingTask(false); setNewTitle('') }}>✕</button>
+              <button type="button" style={{ fontSize: 11, color: 'var(--color-text-muted)' }} onClick={() => { setAddingTask(false); setNewTitle('') }}><PixelIcon name="close" size={10} /></button>
             </div>
           ) : (
             <button

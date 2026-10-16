@@ -1,6 +1,7 @@
 import { useState, useEffect, type CSSProperties } from 'react'
 import { useThemeStore } from '../../stores/themeStore'
 import { PRESETS, type WeatherId, type SeasonId } from '../../lib/themes'
+import { PixelIcon } from '../PixelIcon'
 
 const ACCENT_SWATCHES = [
   '#c4b5fd', '#f0a878', '#7888c0', '#90d890',
@@ -8,10 +9,10 @@ const ACCENT_SWATCHES = [
   '#88d0b8', '#c8c080', '#b088d0', '#80b8d0',
 ]
 
-const WEATHER_OPTIONS: { id: WeatherId; label: string; icon: string }[] = [
-  { id: 'clear', label: 'Clear', icon: '☀' },
-  { id: 'rain', label: 'Rain', icon: '🌧' },
-  { id: 'snow', label: 'Snow', icon: '❄' },
+const WEATHER_OPTIONS: { id: WeatherId; label: string; iconName: string }[] = [
+  { id: 'clear', label: 'Clear', iconName: 'sun' },
+  { id: 'rain', label: 'Rain', iconName: 'rain' },
+  { id: 'snow', label: 'Snow', iconName: 'snow' },
 ]
 
 const SEASONS: { id: SeasonId; label: string }[] = [
@@ -223,7 +224,7 @@ export function ThemeStudioWidget() {
               <div style={presetPreview(p)} />
               <div style={presetName}>{p.name}</div>
               <div style={presetMeta}>
-                <span>{p.weather === 'rain' ? '🌧' : p.weather === 'snow' ? '❄' : '☀'}</span>
+                <PixelIcon name={p.weather === 'rain' ? 'rain' : p.weather === 'snow' ? 'snow' : 'sun'} size={10} />
                 {p.season !== 'default' && <span>{p.season}</span>}
               </div>
             </button>
@@ -294,8 +295,8 @@ export function ThemeStudioWidget() {
         <div style={sectionLabel}>Weather</div>
         <div style={pillRow}>
           {WEATHER_OPTIONS.map((w) => (
-            <button key={w.id} style={pill(activeWeather === w.id)} onClick={() => setWeatherOverride(activeWeather === w.id && weatherOverride !== null ? null : w.id)}>
-              {w.icon} {w.label}
+            <button key={w.id} style={{ ...pill(activeWeather === w.id), display: 'inline-flex', alignItems: 'center', gap: 4 }} onClick={() => setWeatherOverride(activeWeather === w.id && weatherOverride !== null ? null : w.id)}>
+              <PixelIcon name={w.iconName} size={12} /> {w.label}
             </button>
           ))}
         </div>
@@ -340,7 +341,7 @@ export function ThemeStudioWidget() {
             background: respectReducedMotion ? 'var(--color-accent)' : 'transparent',
             color: respectReducedMotion ? 'var(--color-bg-base)' : 'transparent',
           }}>
-            ✓
+            <PixelIcon name="check" size={10} />
           </span>
           <span>Respect reduced-motion preference</span>
         </button>

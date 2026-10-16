@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import type { DockPosition } from '../../stores/widgetStore'
 
 interface DockIconProps {
-  icon: string
+  icon: ReactNode
   label: string
   active: boolean
   dockPosition: DockPosition
@@ -20,7 +20,6 @@ export function DockIcon({ icon, label, active, dockPosition, onClick }: DockIco
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 'var(--radius-md)',
-    fontSize: 18,
     background: active
       ? 'var(--color-accent-glow)'
       : hovered

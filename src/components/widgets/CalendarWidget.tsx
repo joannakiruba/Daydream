@@ -1,6 +1,7 @@
 import { useState, useMemo, type CSSProperties } from 'react'
 import { useTaskStore } from '../../stores/taskStore'
 import { today, addDays, formatDate } from '../../lib/dates'
+import { PixelIcon } from '../PixelIcon'
 
 export function CalendarWidget() {
   const tasks = useTaskStore((s) => s.tasks)
@@ -144,7 +145,7 @@ export function CalendarWidget() {
     return {
       width: 4,
       height: 4,
-      borderRadius: 2,
+      borderRadius: 0,
       background: data.done === data.total ? 'var(--color-success)' : 'var(--color-accent-dim)',
       position: 'absolute',
       bottom: 2,
@@ -170,7 +171,7 @@ export function CalendarWidget() {
   const taskDot = (done: boolean): CSSProperties => ({
     width: 6,
     height: 6,
-    borderRadius: 3,
+    borderRadius: 0,
     background: done ? 'var(--color-success)' : 'var(--color-text-muted)',
     flexShrink: 0,
   })
@@ -180,9 +181,9 @@ export function CalendarWidget() {
   return (
     <div style={container}>
       <div style={nav}>
-        <button style={navBtn} onClick={prevMonth} aria-label="Previous month">‹</button>
+        <button style={navBtn} onClick={prevMonth} aria-label="Previous month"><PixelIcon name="chevron-left" size={12} /></button>
         <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-text-primary)' }}>{monthLabel}</span>
-        <button style={navBtn} onClick={nextMonth} aria-label="Next month">›</button>
+        <button style={navBtn} onClick={nextMonth} aria-label="Next month"><PixelIcon name="chevron-right" size={12} /></button>
       </div>
 
       <div style={gridStyle}>

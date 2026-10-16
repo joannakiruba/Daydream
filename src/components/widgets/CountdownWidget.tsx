@@ -1,6 +1,7 @@
 import { useState, useMemo, type CSSProperties } from 'react'
 import { useCountdownStore } from '../../stores/countdownStore'
 import { daysUntil, formatDate } from '../../lib/dates'
+import { PixelIcon } from '../PixelIcon'
 
 export function CountdownWidget() {
   const countdowns = useCountdownStore((s) => s.countdowns)
@@ -168,7 +169,7 @@ export function CountdownWidget() {
             : `${days} day${days !== 1 ? 's' : ''}`
         return (
           <div key={c.id} style={card}>
-            <span style={numStyle(days)}>{days <= 0 ? (days === 0 ? '!' : '✓') : days}</span>
+            <span style={numStyle(days)}>{days === 0 ? <PixelIcon name="alert" size={18} /> : days < 0 ? <PixelIcon name="check" size={18} /> : days}</span>
             <div style={infoStyle}>
               <div style={titleStyle}>{c.title}</div>
               <div style={dateStyle}>{formatDate(c.targetDate)} — {label}</div>
@@ -180,7 +181,7 @@ export function CountdownWidget() {
               onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-muted)' }}
               aria-label={`Delete ${c.title}`}
             >
-              x
+              <PixelIcon name="trash" size={12} />
             </button>
           </div>
         )

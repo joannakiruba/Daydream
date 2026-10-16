@@ -1,8 +1,8 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import type { CSSProperties } from 'react'
 import { useWidgetStore, dockAxis, type WidgetId, type DockPosition } from '../../stores/widgetStore'
+import { PixelIcon } from '../PixelIcon'
 import { TasksWidget } from '../tasks/TasksWidget'
-import { QuickCaptureWidget } from '../widgets/QuickCaptureWidget'
 import { ScratchpadWidget } from '../widgets/ScratchpadWidget'
 import { JournalWidget } from '../widgets/JournalWidget'
 import { DailyReviewWidget } from '../widgets/DailyReviewWidget'
@@ -14,7 +14,6 @@ const widgetLabels: Record<WidgetId, string> = {
   tasks: 'Tasks',
   journal: 'Journal',
   scratchpad: 'Scratchpad',
-  capture: 'Quick Capture',
   calendar: 'Calendar',
   countdowns: 'Countdowns',
   review: 'Daily Review',
@@ -22,14 +21,13 @@ const widgetLabels: Record<WidgetId, string> = {
 }
 
 const widgetIcons: Record<WidgetId, string> = {
-  tasks: '☑',
-  journal: '✎',
-  scratchpad: '✐',
-  capture: '⚡',
-  calendar: '▦',
-  countdowns: '⏳',
-  review: '★',
-  theme: '◐',
+  tasks: 'tasks',
+  journal: 'journal',
+  scratchpad: 'scratchpad',
+  calendar: 'calendar',
+  countdowns: 'countdowns',
+  review: 'review',
+  theme: 'theme',
 }
 
 function getContainerStyle(pos: DockPosition, isOpen: boolean): CSSProperties {
@@ -105,12 +103,6 @@ export function Drawer() {
     minHeight: 44,
   }
 
-  const iconStyle: CSSProperties = {
-    fontSize: 16,
-    color: 'var(--color-accent-dim)',
-    flexShrink: 0,
-  }
-
   const titleStyle: CSSProperties = {
     fontSize: 14,
     fontWeight: 600,
@@ -153,7 +145,7 @@ export function Drawer() {
             style={getPanelStyle(dockPosition)}
           >
             <div style={headerStyle}>
-              <span style={iconStyle}>{widgetIcons[activeWidget]}</span>
+              <PixelIcon name={widgetIcons[activeWidget]} size={16} color="var(--color-accent-dim)" />
               <span style={titleStyle}>{widgetLabels[activeWidget]}</span>
               <button
                 style={closeStyle}
@@ -162,12 +154,11 @@ export function Drawer() {
                 onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--color-text-primary)' }}
                 onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-muted)' }}
               >
-                ✕
+                <PixelIcon name="close" size={12} />
               </button>
             </div>
             <div style={bodyStyle}>
               {activeWidget === 'tasks' && <TasksWidget />}
-              {activeWidget === 'capture' && <QuickCaptureWidget />}
               {activeWidget === 'scratchpad' && <ScratchpadWidget />}
               {activeWidget === 'journal' && <JournalWidget />}
               {activeWidget === 'review' && <DailyReviewWidget />}

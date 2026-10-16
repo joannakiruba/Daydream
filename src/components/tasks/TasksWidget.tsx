@@ -7,6 +7,7 @@ import { TaskItem } from './TaskItem'
 import { TaskEditor } from './TaskEditor'
 import { ProjectCard } from './ProjectCard'
 import { PROJECT_COLORS } from './TaskEditor'
+import { PixelIcon } from '../PixelIcon'
 
 const tabs = [
   { id: 'today' as const, label: 'Today' },
@@ -87,13 +88,6 @@ function QuickAdd({ onAdd, placeholder }: { onAdd: (title: string) => void; plac
     background: 'var(--color-bg-overlay)',
     border: '1px solid var(--color-border)',
   }
-  const plus: CSSProperties = {
-    fontSize: 14,
-    color: 'var(--color-accent-dim)',
-    flexShrink: 0,
-    width: 20,
-    textAlign: 'center',
-  }
   const inp: CSSProperties = {
     flex: 1,
     fontSize: 13,
@@ -104,7 +98,7 @@ function QuickAdd({ onAdd, placeholder }: { onAdd: (title: string) => void; plac
   }
   return (
     <div style={row}>
-      <span style={plus}>+</span>
+      <PixelIcon name="plus" size={12} color="var(--color-accent-dim)" style={{ flexShrink: 0 }} />
       <input
         style={inp}
         placeholder={placeholder}
@@ -274,7 +268,7 @@ function TodayView() {
   const dailyCheck = (done: boolean): CSSProperties => ({
     width: 20,
     height: 20,
-    borderRadius: 10,
+    borderRadius: 0,
     border: `2px solid ${done ? 'var(--color-success)' : 'var(--color-text-muted)'}`,
     background: done ? 'var(--color-success)' : 'transparent',
     display: 'flex',
@@ -368,7 +362,7 @@ function TodayView() {
         <div key={task.id}>
           <div style={dailyRow}>
             <button style={dailyCheck(assignment.done)} onClick={() => handleDailyToggle(task.id)} aria-label={`Mark ${task.title} ${assignment.done ? 'incomplete' : 'complete'}`}>
-              ✓
+              <PixelIcon name="check" size={10} color={assignment.done ? 'var(--color-bg-base)' : 'transparent'} />
             </button>
             <div style={{
               flex: 1,
@@ -385,7 +379,7 @@ function TodayView() {
                 onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--color-text-muted)' }}
                 title="Defer to another day"
               >
-                ↗
+                <PixelIcon name="defer" size={11} />
               </button>
             )}
           </div>
@@ -499,7 +493,7 @@ function ProjectsView() {
                 style={{
                   width: 20,
                   height: 20,
-                  borderRadius: '50%',
+                  borderRadius: 0,
                   background: c,
                   border: c === newColor ? '2px solid var(--color-text-primary)' : '2px solid transparent',
                   cursor: 'pointer',

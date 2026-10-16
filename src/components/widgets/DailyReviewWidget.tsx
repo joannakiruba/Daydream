@@ -3,6 +3,7 @@ import { useTaskStore } from '../../stores/taskStore'
 import { useJournalStore } from '../../stores/journalStore'
 import { today, formatDate, addDays } from '../../lib/dates'
 import { computePercent } from '../../lib/taskHelpers'
+import { PixelIcon } from '../PixelIcon'
 
 export function DailyReviewWidget() {
   const tasks = useTaskStore((s) => s.tasks)
@@ -131,7 +132,7 @@ export function DailyReviewWidget() {
   const dot = (done: boolean): CSSProperties => ({
     width: 6,
     height: 6,
-    borderRadius: 3,
+    borderRadius: 0,
     background: done ? 'var(--color-success)' : 'var(--color-text-muted)',
     flexShrink: 0,
   })
@@ -203,11 +204,13 @@ export function DailyReviewWidget() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-xs)' }}>
         <div style={sectionLabel}>Status</div>
-        <div style={{ fontSize: 12, color: hasJournal ? 'var(--color-success)' : 'var(--color-text-muted)' }}>
-          {hasJournal ? '● Journal written' : '○ No journal entry yet'}
+        <div style={{ fontSize: 12, color: hasJournal ? 'var(--color-success)' : 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: 'var(--space-xs)' }}>
+          {hasJournal ? <PixelIcon name="check" size={10} color="var(--color-success)" /> : <span style={{ width: 10, height: 10, border: '2px solid var(--color-text-muted)', display: 'inline-block' }} />}
+          {hasJournal ? 'Journal written' : 'No journal entry yet'}
         </div>
-        <div style={{ fontSize: 12, color: dayRecords[todayStr]?.closedAt ? 'var(--color-success)' : 'var(--color-text-muted)' }}>
-          {dayRecords[todayStr]?.closedAt ? '● Day closed' : '○ Day still open'}
+        <div style={{ fontSize: 12, color: dayRecords[todayStr]?.closedAt ? 'var(--color-success)' : 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: 'var(--space-xs)' }}>
+          {dayRecords[todayStr]?.closedAt ? <PixelIcon name="check" size={10} color="var(--color-success)" /> : <span style={{ width: 10, height: 10, border: '2px solid var(--color-text-muted)', display: 'inline-block' }} />}
+          {dayRecords[todayStr]?.closedAt ? 'Day closed' : 'Day still open'}
         </div>
       </div>
     </div>
